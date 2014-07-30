@@ -88,13 +88,9 @@ class Suregiftscheckout_Plugin extends Suregiftscheckout_LifeCycle {
 
    public function addActionsAndFilters() {
 
-        // Add options administration page
-        // http://plugin.michael-simpson.com/?page_id=47
+       
         add_action('admin_menu', array(&$this, 'addSettingsSubMenuPage'));
         add_filter( 'woocommerce_checkout_coupon_message', array(&$this,'woocommerce_rename_coupon_message_on_checkout' ));
-        //add_filter( 'gettext', array(&$this, 'woocommerce_rename_coupon_field_on_checkout'), 10, 3 );
-       // add_action ('woocommerce_applied_coupon', array(&$this,'suregifts_process_coupon')); 
-        //add_action( 'woocommerce_coupon_error', array(&$this, 'suregifts_process_invalid_shop_coupon' ));
         add_action( 'woocommerce_before_cart_table', array(&$this, 'print_notice' ));
         add_action( 'woocommerce_get_shop_coupon_data', array(&$this, 'suregifts_process_valid_coupon' ));
        
@@ -154,8 +150,6 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
     $password =$this->getOption('PasswordInput');
     $mode =$this->getOption('TestMode');
     $coupon_code = $_POST['coupon_code'];
-    //$username = 'Booksville';
-    //$password = 'AMekd7/vjQYePvWf5E7j0lPRkGL3Oc30LS3blRcpprCyy2QO9mZecE07vTaBIK3rDA==';
     $auth = $username.':'.$password;
     //die($auth);
     //$vouchercode = '48426939';
