@@ -15,6 +15,7 @@ class Suregiftscheckout_Plugin extends Suregiftscheckout_LifeCycle {
             //'_version' => array('Installed Version'), // Leave this one commented-out. Uncomment to test upgrades.
             'UsernameInput' => array(__('Username', 'suregiftscheckout-plugin')),
             'PasswordInput' => array(__('Password', 'suregiftscheckout-plugin')),
+            'WebsiteHostInput' => array(__('WebsiteHost', 'suregiftscheckout-plugin')),
             'MessageInput' => array(__('Store Message', 'suregiftscheckout-plugin')),
             'TestMode' => array(__('Test Mode', 'suregiftscheckout-plugin'), 'true', 'false'),
              /*'Donated' => array(__('I have donated to this plugin', 'my-awesome-plugin'), 'false', 'true'),
@@ -148,6 +149,7 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
     global $woocommerce;
     $username =$this->getOption('UsernameInput');
     $password =$this->getOption('PasswordInput');
+    $websitehost = $this-> getOption('WebsiteHostInput');
     $mode =$this->getOption('TestMode');
     $coupon_code = $_POST['coupon_code'];
     $auth = $username.':'.$password;
@@ -180,7 +182,7 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
             $data = array( 
                 "AmountToUse" => $res['AmountToUse'] , 
                 "VoucherCode" => $coupon_code,
-                "WebsiteHost" => ''
+                "WebsiteHost" => $websitehost
               );  
 
         $data_string = json_encode($data);                                                                                   
