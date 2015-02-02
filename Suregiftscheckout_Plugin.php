@@ -92,7 +92,7 @@ class Suregiftscheckout_Plugin extends Suregiftscheckout_LifeCycle {
        
         add_action('admin_menu', array(&$this, 'addSettingsSubMenuPage'));
         add_filter( 'woocommerce_checkout_coupon_message', array(&$this,'woocommerce_rename_coupon_message_on_checkout' ));
-        add_action( 'woocommerce_before_cart_table', array(&$this, 'print_notice' ));
+       // add_action( 'woocommerce_before_cart_table', array(&$this, 'print_notice' ));
         add_action( 'woocommerce_get_shop_coupon_data', array(&$this, 'suregifts_process_valid_coupon' ));
        
 
@@ -179,7 +179,15 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
 
           if ($res['AmountToUse'] != 0){
 
-            $data = array( 
+
+        }
+
+  }
+
+
+  function suregifts_apply_valid_coupon(){
+
+      $data = array( 
                 "AmountToUse" => $res['AmountToUse'] , 
                 "VoucherCode" => $coupon_code,
                 "WebsiteHost" => $websitehost
@@ -244,8 +252,6 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
                // update_post_meta( $new_coupon_id, 'excerpt', $description );
 
           }
-        }
-
   }
 
 }
