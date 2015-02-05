@@ -153,7 +153,7 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
 function  suregifts_woocommerce_after_cart_table(){
     global $woocommerce;
     echo '<div class="submit">';
-              echo '<h3>SureGifts GiftCard</h3>';
+             // echo '<h3>SureGifts GiftCard</h3>';
               
                  if (!$woocommerce->session->suregiftcard) {
               //      echo '<input type="text" name="suregift_card" />';
