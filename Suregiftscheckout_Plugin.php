@@ -163,7 +163,7 @@ function  suregifts_woocommerce_after_cart_table(){
               <table cellspacing="0"><tbody><tr><td colspan="6" class="actions">
               <div class="coupon">
               <label style="display:block" for="coupon_code">Suregifts GiftCard:</label> 
-              <input type="text" style="width:50%" name="suregift_card" class="input-text"  value="" placeholder="GiftCard code">
+              <input type="text"  name="suregift_card" class="input-text"  value="" placeholder="GiftCard code">
                <input type="submit" class="button" name="suregift_card-btn" value="Apply giftcard"></div></td></tr></tbody><table>';
                  }else {
                   // echo ' <input type="submit" name="store-wallet-btn" value="Apply"/>';
