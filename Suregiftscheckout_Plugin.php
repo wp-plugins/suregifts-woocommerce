@@ -92,8 +92,12 @@ class Suregiftscheckout_Plugin extends Suregiftscheckout_LifeCycle {
        
         add_action('admin_menu', array(&$this, 'addSettingsSubMenuPage'));
         add_filter( 'woocommerce_checkout_coupon_message', array(&$this,'woocommerce_rename_coupon_message_on_checkout' ));
-        add_action( 'woocommerce_before_cart_table', array(&$this, 'print_notice' ));
+        //add_action( 'woocommerce_before_cart_table', array(&$this, 'print_notice' ));
         add_action( 'woocommerce_get_shop_coupon_data', array(&$this, 'suregifts_process_valid_coupon' ));
+
+        add_action('woocommerce_after_cart_contents',array(&$this, 'suregifts_woocommerce_after_cart_table'));
+        add_action( 'woocommerce_cart_calculate_fees', array(&$this, 'suregifts_add_cart_fee') );
+        add_action( 'woocommerce_after_checkout_validation', array(&$this, 'suregifts_checkout_validation') );
        
 
 
@@ -128,33 +132,73 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
 
 
 
-  function print_notice(){
-    global $woocommerce;
-           //$message ="we accept suregifts coupon codes";
-           $msg =$this->getOption('MessageInput');
+  // function print_notice(){
+  //   global $woocommerce;
+  //          //$message ="we accept suregifts coupon codes";
+  //          $msg =$this->getOption('MessageInput');
 
-          if (!empty($msg )){
-           $message= $msg.'  Use your Coupon/<a href="http://www.suregifts.com.ng" target="_blank">Suregifts</a> Voucher Below';
+  //         if (!empty($msg )){
+  //          $message= $msg.'  Use your Coupon/<a href="http://www.suregifts.com.ng" target="_blank">Suregifts</a> Voucher Below';
           
            
-          }else{
-             $message= 'enter your <a href="http://www.suregifts.com.ng" target="_blank">Suregifts.com</a> giftcard code';
-          }
-           wc_print_notice( $message, $notice_type = 'notice' );
+  //         }else{
+  //            $message= 'enter your <a href="http://www.suregifts.com.ng" target="_blank">Suregifts.com</a> giftcard code';
+  //         }
+  //          wc_print_notice( $message, $notice_type = 'notice' );
 
-        }
+  //       }
 
-  function suregifts_process_valid_coupon(){
 
+
+function  suregifts_woocommerce_after_cart_table(){
     global $woocommerce;
-    $username =$this->getOption('UsernameInput');
+    echo '<div class="submit">';
+             // echo '<h3>SureGifts GiftCard</h3>';
+              
+                 if (!$woocommerce->session->suregiftcard) {
+              //      echo '<input type="text" name="suregift_card" />';
+              // echo '  <input type="submit" name="suregift_card-btn" value="Apply"/>';
+
+              echo '
+              <table cellspacing="0"><tbody><tr><td colspan="6" class="actions">
+              <div class="coupon">
+              <label style="display:block" for="coupon_code">Suregifts GiftCard:</label> 
+              <input type="text"  name="suregift_card" class="input-text"  value="" placeholder="GiftCard code">
+               <input type="submit" class="button" name="suregift_card-btn" value="Apply giftcard"></div></td></tr></tbody><table>';
+                 }else {
+                  // echo ' <input type="submit" name="store-wallet-btn" value="Apply"/>';
+                  //echo '<input type="text" name="suregift_card" readonly value="giftcard code: '.$woocommerce->session->suregiftcard.'" /><input type="submit" name="un-suregift_card-btn" value="Remove"/>';
+                //echo '<input type="submit" name="un-suregift_card-btn" value="Remove"/>';
+                    echo '
+              <table cellspacing="0"><tbody><tr><td colspan="6" class="actions">
+              <div class="coupon">
+              <label style="display:block" for="coupon_code">Suregifts GiftCard:</label> 
+              
+              <input type="text" style="width:50%" name="suregift_card" readonly  value="'.$woocommerce->session->suregiftcard.'">
+              <input type="submit" class="button" name="un-suregift_card-btn" value="Remove"/></div></td></tr></tbody><table>';
+
+                 }
+              echo '</div>';
+    }
+
+
+
+
+    function suregifts_add_cart_fee() {
+      
+      global $woocommerce;
+      if(isset($_POST['suregift_card-btn']) ){
+      // $username =$this->merchant_username;
+      // $password =$this->merchant_password;
+      // $websitehost =$this -> merchant_webhost;
+      // $mode =$this->testmode;
+        $username =$this->getOption('UsernameInput');
     $password =$this->getOption('PasswordInput');
     $websitehost = $this-> getOption('WebsiteHostInput');
     $mode =$this->getOption('TestMode');
-    $coupon_code = $_POST['coupon_code'];
-    $auth = $username.':'.$password;
-    //die($auth);
-    //$vouchercode = '48426939';
+      $coupon_code = $_POST['suregift_card'];
+      $auth = $username.':'.$password;
+
     if ($mode == "true"){
       $ch = curl_init("https://stagging.oms-suregifts.com/api/voucher/?vouchercode=".$coupon_code); 
       }else{
@@ -174,18 +218,53 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
 
           $returnCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
           curl_close($ch);
+      
 
           $res = json_decode($response, true);
+        //if ( 'yes' == $this->debug )
+      // $this->log->add( 'suregifts_giftcardapi', 'Response for GET card id '.$coupon_code.'==>' .$response );     
+        if ($res['AmountToUse']>0){
+        $woocommerce->session->use_suregiftcard = true;
+        $woocommerce->session->suregiftcard_amt =$res['AmountToUse'];
+         $woocommerce->session->suregiftcard=$coupon_code;
+      
+    wc_add_notice( 'Your SureGifts Card has been applied successfully', 'success' );
+    //$woocommerce->add_notice(__('Your SureGifts Card has been applied successfully', 'woocommerce-suregifts-giftcardapi'));
+      }else{
+        //if (isset($_POST['store-wallet-btn'])){
+      $woocommerce->add_error(__('The SureGift card has been used or invalid', 'woocommerce-suregifts-giftcardapi'));
+        //}
+                 }
+         }
 
-          if ($res['AmountToUse'] != 0){
+        if(isset($_POST['un-suregift_card-btn'])){
+            unset($woocommerce->session->use_suregiftcard);
+          unset($woocommerce->session->suregiftcard);
+          unset($woocommerce->session->suregiftcard_amt);
+          
+           
+          
+                 }
+      if ($woocommerce->session->suregiftcard_amt){
+      $woocommerce->cart->add_fee( __('SureGifts Card: '.$woocommerce->session->suregiftcard, 'woocommerce'), -$woocommerce->session->suregiftcard_amt);
+      }
+                
+      }
 
-            $data = array( 
-                "AmountToUse" => $res['AmountToUse'] , 
-                "VoucherCode" => $coupon_code,
+
+
+
+    function suregifts_checkout_validation($posted){
+      global $woocommerce;
+      $websitehost = $this-> getOption('WebsiteHostInput');
+        $data = array( 
+                "AmountToUse" => $woocommerce->session->suregiftcard_amt, 
+                "VoucherCode" => $woocommerce->session->suregiftcard,
                 "WebsiteHost" => $websitehost
               );  
 
-        $data_string = json_encode($data);                                                                                   
+        $data_string = json_encode($data);       
+      $mode =$this->testmode;                                                                            
         
         if ($mode == "true"){
           $ch = curl_init('https://stagging.oms-suregifts.com/api/voucher');
@@ -209,44 +288,27 @@ function woocommerce_rename_coupon_field_on_checkout( $translated_text, $text, $
         $coupon_res = json_decode($result, true);
 
         $coupon_res_code = $coupon_res['Response'];
+    $desc=$coupon_res['Description'];
+    
+      // if ( 'yes' == $this->debug )
+      // $this->log->add( 'suregifts_giftcardapi', 'Response for POST card id '.$woocommerce->session->suregiftcard.'==>' . $result );
+
+
         //die($coupon_res_code);
-          if ($coupon_res_code == "00"){
+          if ($coupon_res_code != "00"){
+      $woocommerce->add_error(__(($desc!=null?$desc:"Unable to POST your SureGiftsCard"), 'woocommerce-suregifts-giftcardapi'));
+      
+      
+      }else{
+        unset($woocommerce->session->use_suregiftcard);
+        unset($woocommerce->session->suregiftcard);
+        unset($woocommerce->session->suregiftcard_amt);
+      
+    }
+  
+}
 
-               $amount = $res['AmountToUse'] ; // Amount
-                //$amount = 3000;
-                $discount_type = 'fixed_cart'; // Type: fixed_cart, percent, fixed_product, percent_product
-                $usage_limit = 1; 
-                $description = 'Suregifts gift card';
-                              
-                $coupon = array(
-                    'post_title' => $coupon_code,
-                    'post_content' => 'suregifts giftcard',
-                    'post_excerpt' => 'suregifts giftcard',
-                    'post_status' => 'publish',
-                    'post_author' => 1,
-                    'post_type'     => 'shop_coupon',
-                    
-                );
-                                    
-                $new_coupon_id = wp_insert_post( $coupon );
-                                    
-                // Add meta
-                update_post_meta( $new_coupon_id, 'discount_type', $discount_type );
-                update_post_meta( $new_coupon_id, 'coupon_amount', $amount );
-                update_post_meta( $new_coupon_id, 'individual_use', 'yes' );
-                update_post_meta( $new_coupon_id, 'product_ids', '' );
-                update_post_meta( $new_coupon_id, 'exclude_product_ids', '' );
-                update_post_meta( $new_coupon_id, 'usage_limit', 1 );
-                update_post_meta( $new_coupon_id, 'expiry_date', '' );
-                update_post_meta( $new_coupon_id, 'apply_before_tax', 'yes' );
-                update_post_meta( $new_coupon_id, 'free_shipping', 'no' );
-                //update_post_meta( $new_coupon_id, 'usage_limit_per_user', 1 );
-               // update_post_meta( $new_coupon_id, 'excerpt', $description );
 
-          }
-        }
-
-  }
 
 }
 
