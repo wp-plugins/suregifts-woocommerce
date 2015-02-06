@@ -227,6 +227,7 @@ function  suregifts_woocommerce_after_cart_table(){
         $woocommerce->session->use_suregiftcard = true;
         $woocommerce->session->suregiftcard_amt =$res['AmountToUse'];
          $woocommerce->session->suregiftcard=$coupon_code;
+         $woocommerce->cart->discount_total = $res['AmountToUse'];
       
     wc_add_notice( 'Your SureGifts Card has been applied successfully', 'success' );
     //$woocommerce->add_notice(__('Your SureGifts Card has been applied successfully', 'woocommerce-suregifts-giftcardapi'));
@@ -255,6 +256,7 @@ function  suregifts_woocommerce_after_cart_table(){
 
 
     function suregifts_checkout_validation($posted){
+      if ($woocommerce->session->suregiftcard){
       global $woocommerce;
       $websitehost = $this-> getOption('WebsiteHostInput');
         $data = array( 
@@ -305,6 +307,7 @@ function  suregifts_woocommerce_after_cart_table(){
         unset($woocommerce->session->suregiftcard_amt);
       
     }
+  }
   
 }
 
