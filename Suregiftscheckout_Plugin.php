@@ -254,11 +254,11 @@ function  suregifts_woocommerce_after_cart_table(){
 
 
 
-
     function suregifts_checkout_validation($posted){
-      if ($woocommerce->session->suregiftcard){
       global $woocommerce;
-      $websitehost = $this-> getOption('WebsiteHostInput');
+      if ($woocommerce->session->suregiftcard){
+        
+         $websitehost = $this-> getOption('WebsiteHostInput');
         $data = array( 
                 "AmountToUse" => $woocommerce->session->suregiftcard_amt, 
                 "VoucherCode" => $woocommerce->session->suregiftcard,
@@ -298,7 +298,7 @@ function  suregifts_woocommerce_after_cart_table(){
 
         //die($coupon_res_code);
           if ($coupon_res_code != "00"){
-      $woocommerce->add_error(__(($desc!=null?$desc:"Unable to POST your SureGiftsCard"), 'woocommerce-suregifts-giftcardapi'));
+      $woocommerce->add_error(__(($desc!=null?$desc:"Unable to POST your SureGifts GiftCard"), 'woocommerce-suregifts-giftcardapi'));
       
       
       }else{
