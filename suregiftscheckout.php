@@ -2,7 +2,7 @@
 /*
    Plugin Name: SureGifts WooCommerce
    Plugin URI: http://wordpress.org/extend/plugins/suregiftscheckout/
-   Version: 1.3.1
+   Version: 3.0
    Author: SureGifts
    Description: Integrates SureGifts gift card codes with your store’s coupon/discount field on cart/checkout page
    Text Domain: Suregifts Woocommerce

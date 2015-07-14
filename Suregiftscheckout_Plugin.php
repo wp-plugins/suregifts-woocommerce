@@ -200,9 +200,9 @@ function  suregifts_woocommerce_after_cart_table(){
       $auth = $username.':'.$password;
 
     if ($mode == "true"){
-      $ch = curl_init("https://stagging.oms-suregifts.com/api/voucher/?vouchercode=".$coupon_code); 
+      $ch = curl_init("https://oms-suregifts.com/api/voucherredemption?vouchercode=".$coupon_code); 
       }else{
-         $ch = curl_init("https://oms-suregifts.com/api/voucher/?vouchercode=".$coupon_code); 
+         $ch = curl_init("https://oms-suregifts.com/api/voucherredemption?vouchercode=".$coupon_code); 
       }
 
           curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
@@ -215,33 +215,33 @@ function  suregifts_woocommerce_after_cart_table(){
               );
 
           $response = curl_exec($ch);
-
+    
           $returnCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
           curl_close($ch);
       
 
           $res = json_decode($response, true);
         //if ( 'yes' == $this->debug )
-      // $this->log->add( 'suregifts_giftcardapi', 'Response for GET card id '.$coupon_code.'==>' .$response );     
-        if ($res['AmountToUse']>0){
+   // $this->log->add( 'suregifts_giftcardapi', 'Response for GET card id '.$coupon_code.'==>' .$response );     
+        if ($res['AmountToUse']>0.0){
         $woocommerce->session->use_suregiftcard = true;
         $woocommerce->session->suregiftcard_amt =$res['AmountToUse'];
-         $woocommerce->session->suregiftcard=$coupon_code;
-         $woocommerce->cart->discount_total = $res['AmountToUse'];
+        $woocommerce->session->suregiftcard=$coupon_code;
+        $woocommerce->cart->discount_total = $res['AmountToUse'];
       
-    wc_add_notice( 'Your SureGifts Card has been applied successfully', 'success' );
-    //$woocommerce->add_notice(__('Your SureGifts Card has been applied successfully', 'woocommerce-suregifts-giftcardapi'));
+    wc_add_notice( 'SureGifts gift card has been applied successfully', 'success' );
       }else{
         //if (isset($_POST['store-wallet-btn'])){
-      $woocommerce->add_error(__('The SureGift card has been used or invalid', 'woocommerce-suregifts-giftcardapi'));
-        //}
-                 }
-         }
+  wc_add_notice( 'SureGifts gift card is invalid or used', $notice_type = 'error' );
+       // }
+      }
+    }
 
         if(isset($_POST['un-suregift_card-btn'])){
             unset($woocommerce->session->use_suregiftcard);
           unset($woocommerce->session->suregiftcard);
           unset($woocommerce->session->suregiftcard_amt);
+  wc_add_notice( 'SureGifts gift card has been removed', $notice_type = 'notice' );
           
            
           
@@ -256,9 +256,13 @@ function  suregifts_woocommerce_after_cart_table(){
 
     function suregifts_checkout_validation($posted){
       global $woocommerce;
+      //$websitehost = $this-> getOption('WebsiteHostInput');
       if ($woocommerce->session->suregiftcard){
-        
-         $websitehost = $this-> getOption('WebsiteHostInput');
+
+  $username =$this->getOption('UsernameInput');
+      $password =$this->getOption('PasswordInput');
+        $auth = $username.':'.$password;
+        $websitehost = $this-> getOption('WebsiteHostInput');
         $data = array( 
                 "AmountToUse" => $woocommerce->session->suregiftcard_amt, 
                 "VoucherCode" => $woocommerce->session->suregiftcard,
@@ -269,9 +273,9 @@ function  suregifts_woocommerce_after_cart_table(){
       $mode =$this->testmode;                                                                            
         
         if ($mode == "true"){
-          $ch = curl_init('https://stagging.oms-suregifts.com/api/voucher');
+          $ch = curl_init('https://oms-suregifts.com/api/voucherredemption');
           }else{
-           $ch = curl_init('https://oms-suregifts.com/api/voucher');
+           $ch = curl_init('https://oms-suregifts.com/api/voucherredemption');
         }
                                                                       
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
@@ -281,14 +285,13 @@ function  suregifts_woocommerce_after_cart_table(){
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
-        //,
             'Content-Length: ' . strlen($data_string),
             "Authorization: Basic ".base64_encode($auth),
              )
           );
         $result = curl_exec($ch);
         $coupon_res = json_decode($result, true);
-
+  
         $coupon_res_code = $coupon_res['Response'];
     $desc=$coupon_res['Description'];
     
@@ -298,7 +301,12 @@ function  suregifts_woocommerce_after_cart_table(){
 
         //die($coupon_res_code);
           if ($coupon_res_code != "00"){
-      $woocommerce->add_error(__(($desc!=null?$desc:"Unable to POST your SureGifts GiftCard"), 'woocommerce-suregifts-giftcardapi'));
+            unset($woocommerce->session->use_suregiftcard);
+          unset($woocommerce->session->suregiftcard);
+          unset($woocommerce->session->suregiftcard_amt);
+          $woocommerce->cart->discount_total = 0.0;
+  wc_add_notice( $desc.'SureGifts gift card is invalid or used and has been unapplied', $notice_type = 'error' );
+      //$woocommerce->add_error(__(($desc!=null?$desc:"Unable to POST your SureGifts GiftCard"), 'woocommerce-suregifts-giftcardapi'));
       
       
       }else{
