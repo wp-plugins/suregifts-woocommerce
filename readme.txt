@@ -5,8 +5,8 @@ Tags:
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Requires at least: 3.5
-Tested up to: 4.1
-Stable tag: 1.3.1
+Tested up to: 4.3
+Stable tag: 3.0
 
 Integrates SureGifts gift card codes with your store’s coupon/discount field on cart/checkout page
 
@@ -57,3 +57,10 @@ Fill the contact form at www.suregifts.com.ng/partner-merchant or send an e-mail
 
 = 1.2 =
 - Add checkout validation logic
+
+= 1.2 =
+- Bug fixes
+
+= 3.0 =
+- updated API endpoints
+-New Authentication logic implemented
